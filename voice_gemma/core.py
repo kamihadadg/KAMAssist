@@ -73,7 +73,7 @@ def merge_user_message(typed: str | None, voice_text: str | None) -> str:
     t = (typed or "").strip()
     v = (voice_text or "").strip()
     if t and v:
-        return f"{t}\n\n[گفتار]: {v}"
+        return f"{t}\n\n[Speech]: {v}"
     if t:
         return t
     return v
@@ -150,9 +150,10 @@ def make_whisper_model(model_size: str, device: str, compute_type: str) -> Whisp
 
 def lm_studio_connection_hint(base_url: str) -> str:
     return (
-        f"اتصال به LM Studio برقرار نشد.\n"
-        f"آدرس: {base_url}\n"
-        "LM Studio → Local Server → Start را بزنید؛ پورت را با .env مقایسه کنید."
+        f"Could not connect to LM Studio.\n"
+        f"URL: {base_url}\n"
+        "Open LM Studio, go to Local Server, and click Start. "
+        "Match the port with LMSTUDIO_BASE_URL in your .env file."
     )
 
 

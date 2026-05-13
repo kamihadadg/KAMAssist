@@ -1,4 +1,4 @@
-"""Web UI + API برای Voice Gemma (FastAPI)."""
+"""Web UI and HTTP API for Voice Gemma (FastAPI)."""
 
 from __future__ import annotations
 
@@ -7,17 +7,16 @@ import tempfile
 import threading
 from pathlib import Path
 
-from typing import Annotated
-
 import edge_tts
 import uvicorn
-from fastapi import Body, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from openai import APIConnectionError
 from pydantic import BaseModel
 
+from attachments import attachment_blocks_from_uploads
 from core import (
     ask_lm_studio,
     edge_voice_for_whisper_lang,
@@ -52,6 +51,14 @@ class ChatBody(BaseModel):
     lm_url: str | None = None
     api_key: str | None = None
     model_id: str | None = None
+
+
+def _form_str(form, key: str) -> str | None:
+    v = form.get(key)
+    if v is None:
+        return None
+    s = str(v).strip()
+    return s if s else None
 
 
 def _get_whisper(model_size: str, device_flag: str, compute_type: str):
@@ -95,7 +102,7 @@ def create_app() -> FastAPI:
         suffix = Path(name).suffix if Path(name).suffix else ".webm"
         raw = await file.read()
         if not raw:
-            raise HTTPException(400, "فایل صوتی خالی است")
+            raise HTTPException(400, "Empty audio upload")
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(raw)
             path = tmp.name
@@ -109,10 +116,40 @@ def create_app() -> FastAPI:
         return {"text": text, "language": lang}
 
     @app.post("/api/chat")
-    async def api_chat(chat_in: Annotated[ChatBody, Body()]):
+    async def api_chat(request: Request):
+        ct = (request.headers.get("content-type") or "").lower()
+        attach_block = ""
+        if "application/json" in ct:
+            data = await request.json()
+            chat_in = ChatBody.model_validate(data)
+        else:
+            form = await request.form()
+            chat_in = ChatBody(
+                typed=_form_str(form, "typed"),
+                voice_text=_form_str(form, "voice_text"),
+                language=_form_str(form, "language"),
+                tts_voice=_form_str(form, "tts_voice"),
+                system_prompt=_form_str(form, "system_prompt"),
+                lm_url=_form_str(form, "lm_url"),
+                api_key=_form_str(form, "api_key"),
+                model_id=_form_str(form, "model_id"),
+            )
+            uploads = [
+                f for f in form.getlist("files") if isinstance(f, UploadFile)
+            ]
+            attach_block = await attachment_blocks_from_uploads(uploads)
+
         msg = merge_user_message(chat_in.typed, chat_in.voice_text)
+        if attach_block:
+            if msg.strip():
+                msg = f"{msg.rstrip()}\n\n[Attached files]\n{attach_block}"
+            else:
+                msg = f"[Attached files]\n{attach_block}"
         if not msg.strip():
-            raise HTTPException(400, "حداقل یکی از متن یا متن ویس لازم است")
+            raise HTTPException(
+                400, "Provide a message, voice transcript, and/or text attachments"
+            )
+
         base, key, mid = settings_from_env_overrides(
             chat_in.lm_url, chat_in.api_key, chat_in.model_id
         )
@@ -138,7 +175,7 @@ def create_app() -> FastAPI:
         voice: str = Form(...),
     ):
         if not text.strip():
-            raise HTTPException(400, "متن TTS خالی است")
+            raise HTTPException(400, "TTS text is empty")
         comm = edge_tts.Communicate(text.strip(), voice)
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             path = tmp.name
@@ -156,7 +193,7 @@ def create_app() -> FastAPI:
     async def spa_index():
         index = _static / "index.html"
         if not index.is_file():
-            raise HTTPException(500, "static/index.html یافت نشد")
+            raise HTTPException(500, "static/index.html not found")
         return FileResponse(index)
 
     app.mount(

@@ -1,370 +1,368 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Voice Gemma</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg0: #050508;
-      --bg1: #0c0c12;
-      --glass: rgba(20, 20, 32, 0.65);
-      --stroke: rgba(255, 255, 255, 0.09);
+      --sidebar: #202123;
+      --main: #343541;
+      --surface: #40414f;
+      --border: rgba(255, 255, 255, 0.12);
       --text: #ececf1;
-      --muted: #8b8b9e;
-      --violet: #8b5cf6;
-      --cyan: #22d3ee;
-      --rose: #fb7185;
-      --ok: #34d399;
-      --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
-      --radius: 20px;
-      --font: "Vazirmatn", system-ui, sans-serif;
-      --font-en: "Outfit", system-ui, sans-serif;
+      --muted: #8e8ea0;
+      --accent: #19c37d;
+      --danger: #ef4146;
+      --user-bubble: #2f2f2f;
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
     body {
       font-family: var(--font);
-      background: var(--bg0);
+      background: var(--main);
       color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    .aurora {
-      position: fixed;
-      inset: -40%;
-      background:
-        radial-gradient(ellipse 50% 40% at 70% 10%, rgba(139, 92, 246, 0.22), transparent 55%),
-        radial-gradient(ellipse 45% 35% at 20% 80%, rgba(34, 211, 238, 0.15), transparent 50%),
-        radial-gradient(ellipse 30% 25% at 90% 60%, rgba(251, 113, 133, 0.1), transparent 45%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .grid-bg {
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,259,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black, transparent);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .wrap {
-      position: relative;
-      z-index: 1;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 24px 20px 48px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .brand {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-    .brand h1 {
-      font-family: var(--font-en);
-      font-weight: 800;
-      font-size: clamp(1.45rem, 4vw, 1.85rem);
-      letter-spacing: -0.03em;
-      background: linear-gradient(120deg, var(--text) 0%, var(--violet) 45%, var(--cyan) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .brand span {
-      font-size: 0.82rem;
-      color: var(--muted);
-    }
-    .header-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    button, .btn {
-      font-family: var(--font);
-      border: 1px solid var(--stroke);
-      background: var(--glass);
-      color: var(--text);
-      padding: 10px 18px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      backdrop-filter: blur(16px);
-      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    }
-    button:hover, .btn:hover {
-      border-color: rgba(139, 92, 246, 0.45);
-      box-shadow: 0 0 24px rgba(139, 92, 246, 0.2);
-    }
-    button:active { transform: scale(0.97); }
-    button.primary {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.35), rgba(34, 211, 238, 0.2));
-      border-color: rgba(139, 92, 246, 0.5);
-      font-weight: 600;
-    }
-    button.danger {
-      border-color: rgba(251, 113, 133, 0.45);
-      color: #fecdd3;
-    }
-    button.recording {
-      animation: pulse-ring 1.2s ease-out infinite;
-      border-color: var(--rose);
-      color: #fecdd3;
-    }
-    @keyframes pulse-ring {
-      0% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.45); }
-      70% { box-shadow: 0 0 0 14px transparent; }
-      100% { box-shadow: 0 0 0 0 transparent; }
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr min(380px, 100%);
-      gap: 20px;
-      flex: 1;
-      align-items: stretch;
-    }
-    @media (max-width: 900px) {
-      .layout { grid-template-columns: 1fr; }
-    }
-    .panel {
-      background: var(--glass);
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      backdrop-filter: blur(20px);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      min-height: 420px;
       overflow: hidden;
     }
-    .panel-head {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--stroke);
-      font-size: 0.88rem;
-      color: var(--muted);
+    .app {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .panel-head strong { color: var(--text); }
-    .chat-feed {
-      flex: 1;
-      overflow-y: auto;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      max-height: min(58vh, 640px);
-    }
-    .bubble {
-      max-width: 92%;
-      padding: 12px 16px;
-      border-radius: 16px;
-      line-height: 1.65;
-      font-size: 0.95rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-      animation: fade-in 0.35s ease;
-    }
-    @keyframes fade-in {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: none; }
-    }
-    .bubble.user {
-      align-self: flex-start;
-      background: linear-gradient(145deg, rgba(139, 92, 246, 0.22), rgba(20, 20, 32, 0.9));
-      border: 1px solid rgba(139, 92, 246, 0.35);
-    }
-    .bubble.assistant {
-      align-self: flex-end;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--stroke);
-    }
-    .bubble .label {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      margin-bottom: 6px;
-      font-family: var(--font-en);
-    }
-    .composer {
-      padding: 18px;
-      border-top: 1px solid var(--stroke);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    label.field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 0.82rem;
-      color: var(--muted);
-    }
-    textarea, input, select {
-      font-family: var(--font);
+      height: 100vh;
       width: 100%;
-      border-radius: 12px;
-      border: 1px solid var(--stroke);
-      background: rgba(0, 0, 0, 0.35);
-      color: var(--text);
-      padding: 12px 14px;
-      font-size: 0.92rem;
-      resize: vertical;
-      min-height: 44px;
     }
-    textarea { min-height: 96px; }
-    textarea:focus, input:focus, select:focus {
-      outline: none;
-      border-color: rgba(139, 92, 246, 0.55);
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
-    }
-    .row {
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
+      flex-direction: column;
+      padding: 12px;
+      gap: 8px;
     }
-    .row > * { flex: 1; min-width: 120px; }
-    .row .grow0 { flex: 0 0 auto; min-width: unset; }
-    .settings {
+    .sidebar-brand {
+      padding: 10px 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .nav-btn:hover { background: rgba(255, 255, 255, 0.06); }
+    .sidebar-foot {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .field-mini label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+    }
+    .field-mini input, .field-mini select, .field-mini textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #2a2a2a;
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+    .field-mini textarea { min-height: 56px; resize: vertical; }
+    .settings-panel {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.45s ease;
+      transition: max-height 0.35s ease;
     }
-    .settings.open {
-      max-height: 1200px;
-    }
-    .settings-inner {
-      padding: 18px;
-      border-top: 1px solid var(--stroke);
+    .settings-panel.open { max-height: 520px; overflow-y: auto; }
+    .main {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      min-width: 0;
+      background: var(--main);
+    }
+    .topbar {
+      height: 48px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    #model-hint { font-size: 0.8rem; }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px 24px;
+    }
+    .messages-inner {
+      max-width: 768px;
+      margin: 0 auto;
+      padding-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .msg-row {
+      display: flex;
+      width: 100%;
+    }
+    .msg-row.user { justify-content: flex-end; }
+    .msg-row.assistant { justify-content: flex-start; }
+    .msg {
+      max-width: min(85%, 640px);
+      border-radius: 18px;
+      padding: 12px 16px;
+      line-height: 1.6;
+      font-size: 0.9375rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .msg.user {
+      background: var(--user-bubble);
+      color: var(--text);
+    }
+    .msg.assistant {
+      background: transparent;
+      color: var(--text);
+    }
+    .msg .role-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .compose-wrap {
+      border-top: 1px solid var(--border);
+      background: var(--main);
+      padding: 12px 16px 20px;
+    }
+    .compose-inner { max-width: 768px; margin: 0 auto; }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text);
+    }
+    .chip button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 2px;
+    }
+    .chip button:hover { color: var(--danger); }
+    .compose-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid #565869;
+      border-radius: 26px;
+      padding: 8px 12px;
+      min-height: 52px;
+    }
+    .compose-bar textarea {
+      flex: 1;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      resize: none;
+      min-height: 24px;
+      max-height: 200px;
+      line-height: 1.5;
+      padding: 8px 4px;
+    }
+    .compose-bar textarea:focus { outline: none; }
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .icon-btn:hover { background: rgba(255, 255, 255, 0.08); color: var(--text); }
+    .icon-btn.recording {
+      color: var(--danger);
+      animation: pulse 1.2s ease infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.55; }
+    }
+    .icon-btn.send {
+      background: var(--text);
+      color: #000;
+      border-radius: 10px;
+    }
+    .icon-btn.send:hover { background: #fff; }
+    .icon-btn.send:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
     }
     .status {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--muted);
-      min-height: 1.4em;
+      margin-top: 8px;
+      min-height: 1.25em;
     }
-    .status.ok { color: var(--ok); }
-    .status.err { color: var(--rose); }
-    audio#player { width: 100%; margin-top: 8px; border-radius: 10px; }
+    .status.err { color: var(--danger); }
+    .status.ok { color: var(--accent); }
+    #file-input { display: none; }
+    audio#player {
+      width: 100%;
+      max-width: 768px;
+      margin: 8px auto 0;
+      display: none;
+      border-radius: 8px;
+    }
+    @media (max-width: 768px) {
+      .sidebar { width: 72px; min-width: 72px; padding: 8px; }
+      .sidebar-brand, .nav-btn span, .sidebar-foot .field-mini { display: none; }
+      .nav-btn { justify-content: center; padding: 10px; }
+    }
   </style>
 </head>
 <body>
-  <div class="aurora"></div>
-  <div class="grid-bg"></div>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <h1>Voice Gemma</h1>
-        <span>LM Studio + Whisper + edge-tts — چندزبانه</span>
-      </div>
-      <div class="header-actions">
-        <button type="button" id="btn-settings" class="btn">تنظیمات</button>
-      </div>
-    </header>
-
-    <div class="layout">
-      <section class="panel">
-        <div class="panel-head">
-          <span><strong>گفتگو</strong></span>
-          <span id="model-hint" style="font-size:0.78rem;"></span>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-brand">Voice Gemma</div>
+      <button type="button" class="nav-btn" id="btn-new" title="New chat">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span>New chat</span>
+      </button>
+      <button type="button" class="nav-btn" id="btn-settings-toggle">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg>
+        <span>Settings</span>
+      </button>
+      <div class="settings-panel" id="settings-panel">
+        <div class="field-mini" style="margin-top:8px">
+          <label>LM Studio URL</label>
+          <input id="cfg-lm-url" type="text" autocomplete="off" />
         </div>
-        <div class="chat-feed" id="chat-feed"></div>
-        <div class="composer">
+        <div class="field-mini">
+          <label>API key</label>
+          <input id="cfg-api-key" type="password" autocomplete="off" />
+        </div>
+        <div class="field-mini">
+          <label>Model id</label>
+          <input id="cfg-model" type="text" autocomplete="off" />
+        </div>
+        <div class="field-mini">
+          <label>Whisper</label>
+          <select id="cfg-whisper">
+            <option value="tiny">tiny</option>
+            <option value="base">base</option>
+            <option value="small" selected>small</option>
+            <option value="medium">medium</option>
+            <option value="large-v3">large-v3</option>
+          </select>
+        </div>
+        <div class="field-mini">
+          <label>Device</label>
+          <select id="cfg-device">
+            <option value="auto" selected>auto</option>
+            <option value="cpu">cpu</option>
+            <option value="cuda">cuda</option>
+          </select>
+        </div>
+        <div class="field-mini">
+          <label>Language (STT / TTS)</label>
+          <input id="input-lang" type="text" placeholder="en" />
+        </div>
+        <div class="field-mini">
+          <label>Voice transcript</label>
+          <textarea id="input-voice" placeholder="Filled after recording…"></textarea>
+        </div>
+        <div class="field-mini">
+          <label>System prompt</label>
+          <textarea id="cfg-system"></textarea>
+        </div>
+        <button type="button" class="nav-btn" id="btn-save-cfg" style="margin-top:8px"><span>Save settings</span></button>
+      </div>
+      <div class="sidebar-foot">
+        <span>Troubleshooting: start <strong>LM Studio → Local Server</strong>. Port in Settings must match (often 1234).</span>
+        <span>If you see text but no sound, check internet (edge-tts) or the red status line.</span>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <span id="model-hint"></span>
+      </div>
+      <div class="messages" id="messages-scroll">
+        <div class="messages-inner" id="chat-feed"></div>
+      </div>
+      <div class="compose-wrap">
+        <div class="compose-inner">
+          <audio id="player" controls></audio>
+          <div class="chips" id="attach-chips" hidden></div>
+          <div class="compose-bar">
+            <input type="file" id="file-input" multiple />
+            <button type="button" class="icon-btn" id="btn-attach" title="Attach files" aria-label="Attach files">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <textarea id="input-text" rows="1" placeholder="Message…"></textarea>
+            <button type="button" class="icon-btn" id="btn-mic" title="Voice" aria-label="Record voice">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+            </button>
+            <button type="button" class="icon-btn send" id="btn-send" title="Send" aria-label="Send">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4l-8 8h5v8h6v-8h5L12 4z"/></svg>
+            </button>
+          </div>
           <div class="status" id="status"></div>
-          <audio id="player" controls style="display:none;"></audio>
-          <div class="row">
-            <button type="button" class="primary grow0" id="btn-send">ارسال به مدل</button>
-            <button type="button" class="grow0" id="btn-mic">ضبط صدا</button>
-          </div>
         </div>
-      </section>
-
-      <aside class="panel">
-        <div class="panel-head">
-          <span><strong>ورودی</strong></span>
-          <span id="lang-detect" style="font-size:0.78rem;"></span>
-        </div>
-        <div style="padding:18px;display:flex;flex-direction:column;gap:14px;flex:1;">
-          <label class="field">متن
-            <textarea id="input-text" placeholder="اینجا تایپ کنید…"></textarea>
-          </label>
-          <label class="field">رونویسی ویس (قابل ویرایش)
-            <textarea id="input-voice" placeholder="بعد از ضبط، اینجا پر می‌شود"></textarea>
-          </label>
-          <label class="field">زبان TTS / شنیدار (مثلاً fa یا en)
-            <input id="input-lang" type="text" placeholder="fa" />
-          </label>
-          <p style="font-size:0.8rem;color:var(--muted);line-height:1.5;">
-            نکته: LM Studio باید با Local Server روشن باشد (معمولاً پورت 1234). این UI روی پورت وب خودش اجرا می‌شود.
-          </p>
-        </div>
-        <div class="settings" id="settings">
-          <div class="settings-inner">
-            <label class="field">LM Studio base URL
-              <input id="cfg-lm-url" type="text" autocomplete="off" />
-            </label>
-            <label class="field">API key
-              <input id="cfg-api-key" type="password" autocomplete="off" />
-            </label>
-            <label class="field">شناسه مدل
-              <input id="cfg-model" type="text" autocomplete="off" />
-            </label>
-            <label class="field">Whisper (اندازه)
-              <select id="cfg-whisper">
-                <option value="tiny">tiny</option>
-                <option value="base">base</option>
-                <option value="small" selected>small</option>
-                <option value="medium">medium</option>
-                <option value="large-v3">large-v3</option>
-              </select>
-            </label>
-            <label class="field">دستگاه Whisper
-              <select id="cfg-device">
-                <option value="auto" selected>auto</option>
-                <option value="cpu">cpu</option>
-                <option value="cuda">cuda</option>
-              </select>
-            </label>
-            <label class="field">پیام سیستم (اختیاری)
-              <textarea id="cfg-system" style="min-height:72px;"></textarea>
-            </label>
-            <button type="button" class="primary" id="btn-save-cfg">ذخیره در مرورگر</button>
-          </div>
-        </div>
-      </aside>
-    </div>
+      </div>
+    </main>
   </div>
 
   <script>
     const $ = (id) => document.getElementById(id);
-    const LS = {
-      lm_url: "vg_lm_url",
-      api_key: "vg_api_key",
-      model: "vg_model",
-      whisper: "vg_whisper",
-      device: "vg_device",
-      system: "vg_system",
-      lang: "vg_lang",
-    };
+    const LS = { lm_url:"vg_lm_url", api_key:"vg_api_key", model:"vg_model", whisper:"vg_whisper", device:"vg_device", system:"vg_system", lang:"vg_lang" };
+    let pendingFiles = [];
 
     function loadCfg() {
       $("cfg-lm-url").value = localStorage.getItem(LS.lm_url) || "http://127.0.0.1:1234/v1";
@@ -373,10 +371,9 @@
       $("cfg-whisper").value = localStorage.getItem(LS.whisper) || "small";
       $("cfg-device").value = localStorage.getItem(LS.device) || "auto";
       $("cfg-system").value = localStorage.getItem(LS.system) || "";
-      $("input-lang").value = localStorage.getItem(LS.lang) || "fa";
+      $("input-lang").value = localStorage.getItem(LS.lang) || "en";
       $("model-hint").textContent = $("cfg-model").value.split("/").pop() || "";
     }
-
     function saveCfg() {
       localStorage.setItem(LS.lm_url, $("cfg-lm-url").value.trim());
       localStorage.setItem(LS.api_key, $("cfg-api-key").value);
@@ -386,85 +383,129 @@
       localStorage.setItem(LS.system, $("cfg-system").value.trim());
       localStorage.setItem(LS.lang, $("input-lang").value.trim());
       $("model-hint").textContent = $("cfg-model").value.split("/").pop() || "";
-      setStatus("تنظیمات ذخیره شد.", "ok");
+      setStatus("Settings saved.", "ok");
     }
-
     function setStatus(msg, cls) {
       const el = $("status");
       el.textContent = msg || "";
       el.className = "status" + (cls ? " " + cls : "");
     }
-
-    function addBubble(role, text) {
+    function apiErrorDetail(j) {
+      if (!j) return "Unknown error";
+      if (typeof j.detail === "string") return j.detail;
+      if (Array.isArray(j.detail))
+        return j.detail.map((x) => (x.msg ? x.msg : JSON.stringify(x))).join("; ");
+      return JSON.stringify(j.detail || j);
+    }
+    function scrollBottom() {
+      const m = $("messages-scroll");
+      m.scrollTop = m.scrollHeight;
+    }
+    function addMessage(role, text) {
       const feed = $("chat-feed");
-      const div = document.createElement("div");
-      div.className = "bubble " + (role === "user" ? "user" : "assistant");
-      const label = document.createElement("div");
-      label.className = "label";
-      label.textContent = role === "user" ? "شما" : "Gemma";
-      div.appendChild(label);
+      const row = document.createElement("div");
+      row.className = "msg-row " + role;
+      const box = document.createElement("div");
+      box.className = "msg " + role;
+      const lab = document.createElement("div");
+      lab.className = "role-label";
+      lab.textContent = role === "user" ? "You" : "Assistant";
       const body = document.createElement("div");
       body.textContent = text;
-      div.appendChild(body);
-      feed.appendChild(div);
-      feed.scrollTop = feed.scrollHeight;
+      box.appendChild(lab);
+      box.appendChild(body);
+      row.appendChild(box);
+      feed.appendChild(row);
+      scrollBottom();
     }
-
-    $("btn-settings").onclick = () => {
-      $("settings").classList.toggle("open");
+    function renderChips() {
+      const wrap = $("attach-chips");
+      wrap.innerHTML = "";
+      if (!pendingFiles.length) {
+        wrap.hidden = true;
+        return;
+      }
+      wrap.hidden = false;
+      pendingFiles.forEach((f, i) => {
+        const c = document.createElement("div");
+        c.className = "chip";
+        c.appendChild(document.createTextNode(f.name));
+        const x = document.createElement("button");
+        x.type = "button";
+        x.textContent = "×";
+        x.onclick = () => { pendingFiles.splice(i, 1); renderChips(); };
+        c.appendChild(x);
+        wrap.appendChild(c);
+      });
+    }
+    $("btn-attach").onclick = () => $("file-input").click();
+    $("file-input").onchange = (e) => {
+      const list = e.target.files;
+      if (!list) return;
+      for (let i = 0; i < list.length; i++) pendingFiles.push(list[i]);
+      e.target.value = "";
+      renderChips();
     };
+
+    $("btn-settings-toggle").onclick = () => $("settings-panel").classList.toggle("open");
     $("btn-save-cfg").onclick = saveCfg;
+    $("btn-new").onclick = () => {
+      $("chat-feed").innerHTML = "";
+      $("input-text").value = "";
+      pendingFiles = [];
+      renderChips();
+      setStatus("", "");
+    };
 
-    let mediaRecorder = null;
-    let audioChunks = [];
-    let audioStream = null;
-    let recording = false;
+    $("input-text").addEventListener("input", function () {
+      this.style.height = "auto";
+      this.style.height = Math.min(this.scrollHeight, 200) + "px";
+    });
 
+    $("input-text").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        $("btn-send").click();
+      }
+    });
+
+    let mediaRecorder = null, audioChunks = [], audioStream = null, recording = false;
     $("btn-mic").onclick = async () => {
       if (!recording) {
         try {
           audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         } catch (e) {
-          setStatus("اجازه میکروفن داده نشد.", "err");
+          setStatus("Microphone permission denied.", "err");
           return;
         }
-        const opts = { mimeType: MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" : "audio/webm" };
-        mediaRecorder = new MediaRecorder(audioStream, opts);
+        const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" : "audio/webm";
+        mediaRecorder = new MediaRecorder(audioStream, { mimeType: mime });
         audioChunks = [];
         mediaRecorder.ondataavailable = (e) => { if (e.data.size) audioChunks.push(e.data); };
         mediaRecorder.start();
         recording = true;
         $("btn-mic").classList.add("recording");
-        $("btn-mic").textContent = "توقف ضبط";
-        setStatus("در حال ضبط…", "");
+        setStatus("Recording…", "");
       } else {
         recording = false;
         $("btn-mic").classList.remove("recording");
-        $("btn-mic").textContent = "ضبط صدا";
-        setStatus("در حال رونویسی…", "");
-        await new Promise((resolve) => {
-          mediaRecorder.onstop = resolve;
-          mediaRecorder.stop();
-        });
-        if (audioStream) {
-          audioStream.getTracks().forEach((t) => t.stop());
-          audioStream = null;
-        }
+        setStatus("Transcribing…", "");
+        await new Promise((r) => { mediaRecorder.onstop = r; mediaRecorder.stop(); });
+        if (audioStream) { audioStream.getTracks().forEach((t) => t.stop()); audioStream = null; }
         const blob = new Blob(audioChunks, { type: "audio/webm" });
         const fd = new FormData();
         fd.append("file", blob, "rec.webm");
-        const lang = $("input-lang").value.trim() || null;
+        const lang = $("input-lang").value.trim();
         if (lang) fd.append("language", lang);
         fd.append("whisper_model", $("cfg-whisper").value);
         fd.append("device", $("cfg-device").value);
         fd.append("compute_type", "int8");
         try {
           const r = await fetch("/api/transcribe", { method: "POST", body: fd });
-          const j = await r.json();
-          if (!r.ok) throw new Error(j.detail || r.statusText);
+          const j = await r.json().catch(() => ({}));
+          if (!r.ok) throw new Error(apiErrorDetail(j) || r.statusText);
           $("input-voice").value = j.text || "";
-          $("lang-detect").textContent = j.language ? ("زبان: " + j.language) : "";
-          setStatus("رونویسی انجام شد.", "ok");
+          setStatus("Transcription done. (" + (j.language || "?") + ")", "ok");
         } catch (e) {
           setStatus(String(e.message || e), "err");
         }
@@ -476,14 +517,10 @@
       fd.append("text", text);
       fd.append("voice", voice);
       const r = await fetch("/api/tts", { method: "POST", body: fd });
-      if (!r.ok) {
-        const t = await r.text();
-        throw new Error(t || "TTS failed");
-      }
+      if (!r.ok) throw new Error(await r.text() || "TTS failed");
       const blob = await r.blob();
-      const url = URL.createObjectURL(blob);
       const player = $("player");
-      player.src = url;
+      player.src = URL.createObjectURL(blob);
       player.style.display = "block";
       player.play().catch(() => {});
     }
@@ -492,43 +529,54 @@
       saveCfg();
       const typed = $("input-text").value.trim();
       const voiceText = $("input-voice").value.trim();
-      if (!typed && !voiceText) {
-        setStatus("متن یا ویس لازم است.", "err");
+      if (!typed && !voiceText && !pendingFiles.length) {
+        setStatus("Add a message, voice note, or attachment.", "err");
         return;
       }
-      const payload = {
-        typed: typed || null,
-        voice_text: voiceText || null,
-        language: $("input-lang").value.trim() || null,
-        tts_voice: null,
-        system_prompt: $("cfg-system").value.trim() || null,
-        lm_url: $("cfg-lm-url").value.trim() || null,
-        api_key: $("cfg-api-key").value || null,
-        model_id: $("cfg-model").value.trim() || null,
-      };
-      const displayUser = [typed, voiceText ? ("ویس: " + voiceText) : null].filter(Boolean).join("\n\n");
-      addBubble("user", displayUser || "(خالی)");
-      setStatus("در حال گفتگو با LM Studio…", "");
+      const displayParts = [];
+      if (typed) displayParts.push(typed);
+      if (voiceText) displayParts.push("[Voice: " + voiceText + "]");
+      if (pendingFiles.length) displayParts.push("[Attachments: " + pendingFiles.map((f) => f.name).join(", ") + "]");
+      addMessage("user", displayParts.join("\n\n") || "(empty)");
+      setStatus("Thinking…", "");
+
+      const fd = new FormData();
+      fd.append("typed", typed || "");
+      fd.append("voice_text", voiceText || "");
+      fd.append("language", $("input-lang").value.trim() || "");
+      fd.append("system_prompt", $("cfg-system").value.trim() || "");
+      fd.append("lm_url", $("cfg-lm-url").value.trim() || "");
+      fd.append("api_key", $("cfg-api-key").value || "");
+      fd.append("model_id", $("cfg-model").value.trim() || "");
+      pendingFiles.forEach((f) => fd.append("files", f));
+      const filesSnapshot = pendingFiles.slice();
+      pendingFiles = [];
+      renderChips();
+
       try {
-        const r = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const r = await fetch("/api/chat", { method: "POST", body: fd });
         const j = await r.json().catch(() => ({}));
-        if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail || j));
-        addBubble("assistant", j.reply);
-        setStatus("پخش صوت پاسخ…", "ok");
-        await playTts(j.reply, j.tts_voice);
-        setStatus("آماده.", "ok");
+        if (!r.ok) throw new Error(apiErrorDetail(j));
+        const replyText = j.reply != null && String(j.reply).trim() ? String(j.reply) : "(Empty reply from model)";
+        addMessage("assistant", replyText);
+        $("input-text").value = "";
+        $("input-text").style.height = "auto";
+        try {
+          setStatus("Playing audio…", "ok");
+          await playTts(replyText, j.tts_voice);
+          setStatus("Ready.", "ok");
+        } catch (audioErr) {
+          setStatus("Reply received; audio failed: " + (audioErr.message || audioErr), "err");
+        }
       } catch (e) {
         setStatus(String(e.message || e), "err");
-        addBubble("assistant", "خطا: " + (e.message || e));
+        addMessage("assistant", "Error: " + (e.message || e));
+        filesSnapshot.forEach((f) => pendingFiles.push(f));
+        renderChips();
       }
     };
 
     loadCfg();
-    saveCfg();
   </script>
 </body>
 </html>
